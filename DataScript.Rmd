@@ -13,16 +13,44 @@ dat <- read_sheet("https://docs.google.com/spreadsheets/d/1h1ZudRdrVLPs_HSrMyJs0
 
 dat <- clean_names(dat)
 
-shortname <- c("Q1_",
-               "methods_i_use",
-               "colleague_research",
-               "complex_topics",
-               "ask_questions",
-               "five_expert",
-               "five_ds_challenges",
-               "hope_to_learn",
-               "postac_ds_identity")
+shortname <- c("years",
+"sector_my",
+"role_my",
+"my_region",
+"acc_type",
+"sector_mature",
+"sector_should",
+"role_success",
+"role_should",
+"gov_path",
+"who_should",
+"diff_bounties",
+"diff_public_bodies",
+"diff_open_audit_tool",
+"diff_public_procurement",
+"diff_impact_assess",
+"diff_audit",
+"diff_direct_sh",
+"diff_antic_interest_sh",
+"diff_disp_outcome",
+"diff_dataset_acc",
+"diff_expl",
+"matur_bounties",
+"matur_public_bodies",
+"matur_open_audit_tool",
+"matur_public_procurement",
+"matur_impact_assess",
+"matur_audit",
+"matur_direct_sh",
+"matur_antic_interest_sh",
+"matur_disp_outcome",
+"matur_dataset_acc",
+"matur_expl",
+"obstacles",
+"comment")
 
+#Rename columns with the list of short column names (names are too long otherwise)
+colnames(dat) <- c(shortname)
 
 ```
 
