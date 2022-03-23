@@ -6,10 +6,22 @@ output: html_document
 ```{r setup, include=FALSE}
 #Set up library 
 library(googlesheets4)
+library(janitor)
 
 #Pull in Data 
 dat <- read_sheet("https://docs.google.com/spreadsheets/d/1h1ZudRdrVLPs_HSrMyJs0rd5kMD5vNh6D0ZvEeYN45g/edit#gid=0")
 
+dat <- clean_names(dat)
+
+shortname <- c("Q1_",
+               "methods_i_use",
+               "colleague_research",
+               "complex_topics",
+               "ask_questions",
+               "five_expert",
+               "five_ds_challenges",
+               "hope_to_learn",
+               "postac_ds_identity")
 
 
 ```
