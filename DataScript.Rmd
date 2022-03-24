@@ -7,12 +7,18 @@ output: html_document
 #Set up library 
 library(googlesheets4)
 library(janitor)
+library(tidyverse)
+library(dplyr)
+library(rlang)
 
-#Pull in Data 
+#Data Loadin  
 dat <- read_sheet("https://docs.google.com/spreadsheets/d/1h1ZudRdrVLPs_HSrMyJs0rd5kMD5vNh6D0ZvEeYN45g/edit#gid=0")
 
+#this uses the janitor package to clean up the names so that there are no spaces. 
+#the names are still too long. 
 dat <- clean_names(dat)
 
+#So we write out a list of the names of the columns we would like in the order they will be used. 
 shortname <- c("years",
 "sector_my",
 "role_my",
@@ -47,10 +53,14 @@ shortname <- c("years",
 "matur_dataset_acc",
 "matur_expl",
 "obstacles",
+"promising_area",
 "comment")
 
 #Rename columns with the list of short column names (names are too long otherwise)
 colnames(dat) <- c(shortname)
+
+#add an index number for working with multiple select questions
+dat$index <- 1:nrow(dat)
 
 ```
 
@@ -58,17 +68,79 @@ colnames(dat) <- c(shortname)
 
 ```{r}
 
+#Now we're going to figure out how to get counts for multiple select questions (meaning there are multiple things that the respondent can select)
 
+#Role Select
+cht_role_select <- dat %>% 
+  select(index, role_success) %>% 
+#first we select the data column and the index column 
+          separate_rows(role_success,  
+                     sep = ", ") %>% 
+#then we split the data separated by commas, 
+#index shows who said what combination of answers Sort by amount. 
+          count(role_success, sort =TRUE) %>% 
+      mutate(
+        percent = paste0(round(n/sum(n)*100,2),"%") 
+      )
 
+cht_role_should <- dat %>% 
+      select(index, role_should) %>% 
+      separate_rows(role_should,  
+                     sep = ", ") %>% 
+      count(role_should, sort =TRUE) %>% 
+      mutate(
+        percent = paste0(round(n/sum(n)*100,2),"%") 
+      )
+
+cht_obstacles <- dat %>% 
+      select(index, obstacles) %>% 
+      separate_rows(obstacles,  
+                     sep = ", ") %>% 
+      count(obstacles, sort =TRUE) %>% 
+      mutate(
+        percent = paste0(round(n/sum(n)*100,2),"%") 
+      )
+
+cht_promising <- dat %>% 
+      select(index, promising_area) %>% 
+      separate_rows(promising_area,  
+                     sep = ", ") %>% 
+      count(promising_area, sort =TRUE) %>% 
+      mutate(
+        percent = paste0(round(n/sum(n)*100,2),"%") 
+      )
+
+#Does not have multiple select - basic charts 
+cht_who_should <- dat %>% 
+      select(index, who_should) %>% 
+      count(who_should, sort =TRUE) %>% 
+      mutate(
+        percent = paste0(round(n/sum(n)*100,2),"%") 
+      )
+
+cht_years <- dat %>% 
+      select(index, years) %>% 
+      count(years, sort =TRUE) %>% 
+      mutate(
+        percent = paste0(round(n/sum(n)*100,2),"%") 
+      )
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#Can't get the function to work 
+#mult_select <- function(dat, mscol, index) {
+#    dat %>% 
+#    select(dat, !!sym(mscol), index) %>%
+#    separate_rows(!!sym(mscol), sep = ", ") %>% 
+#    count(!!sym(mscol), sort = TRUE ) %>% 
+#    mutate(
+#      percent = paste(round(n/sum(n)*100,2), "%")
+#    )}
+    
+#cht_role_should <- mult_select(dat, role_success, index)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
