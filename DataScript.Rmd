@@ -68,79 +68,143 @@ dat$index <- 1:nrow(dat)
 
 ```{r}
 
-#Now we're going to figure out how to get counts for multiple select questions (meaning there are multiple things that the respondent can select)
+#Build a function for multi-select questions to get counts and percentages for multiple select questions (meaning there are multiple things that the respondent can select)
 
-#Role Select
-cht_role_select <- dat %>% 
-  select(index, role_success) %>% 
+mult_select <- function(dat, mscol, index) {
+    newdf <- dat %>% 
+    select({{ mscol }}, {{ index }}) %>%
+    separate_rows({{ mscol }}, sep = ", ") %>% 
+    count({{ mscol }}, sort = TRUE ) %>% 
+    mutate(
+      percent = paste(round(n/sum(n)*100,2), "%")
+    )
+  return(newdf)
+  }
+
 #first we select the data column and the index column 
-          separate_rows(role_success,  
-                     sep = ", ") %>% 
 #then we split the data separated by commas, 
-#index shows who said what combination of answers Sort by amount. 
-          count(role_success, sort =TRUE) %>% 
-      mutate(
-        percent = paste0(round(n/sum(n)*100,2),"%") 
-      )
+#index shows who said what combination of answers 
+    
+#Charts for each of the multiple select variables 
+cht_role_success <- mult_select(dat, role_success, index)
+cht_role_should <- mult_select(dat, role_should, index)
+cht_obstacles <- mult_select(dat, obstacles, index)
+cht_promising <- mult_select(dat, promising_area, index)
 
-cht_role_should <- dat %>% 
-      select(index, role_should) %>% 
-      separate_rows(role_should,  
-                     sep = ", ") %>% 
-      count(role_should, sort =TRUE) %>% 
-      mutate(
-        percent = paste0(round(n/sum(n)*100,2),"%") 
-      )
+#List of what should be included in spreadsheet
+MSCharts <- list(role_success = cht_role_success, 
+                 role_should = cht_role_should, 
+                 obstacles = cht_obstacles, 
+                 promising = cht_promising)
+#Write to Gsheets 
+ss <- gs4_create("ACL_MSCharts", 
+                 sheets = MSCharts)
 
-cht_obstacles <- dat %>% 
-      select(index, obstacles) %>% 
-      separate_rows(obstacles,  
-                     sep = ", ") %>% 
-      count(obstacles, sort =TRUE) %>% 
-      mutate(
-        percent = paste0(round(n/sum(n)*100,2),"%") 
-      )
 
-cht_promising <- dat %>% 
-      select(index, promising_area) %>% 
-      separate_rows(promising_area,  
-                     sep = ", ") %>% 
-      count(promising_area, sort =TRUE) %>% 
-      mutate(
-        percent = paste0(round(n/sum(n)*100,2),"%") 
-      )
+#Basic Chart Function w/o multiple select 
+basic_chart <- function(dat, mscol, index) {
+    newdf <- dat %>% 
+    select({{ mscol }}, {{ index }}) %>%
+    count({{ mscol }}, sort = TRUE ) %>% 
+    mutate(
+      percent = paste(round(n/sum(n)*100,2), "%")
+    )
+  return(newdf)
+  }
 
-#Does not have multiple select - basic charts 
-cht_who_should <- dat %>% 
-      select(index, who_should) %>% 
-      count(who_should, sort =TRUE) %>% 
-      mutate(
-        percent = paste0(round(n/sum(n)*100,2),"%") 
-      )
+cht_who_should <- basic_chart(dat, who_should, index)
+cht_years <- basic_chart(dat, years, index)
+cht_sector_my <- basic_chart(dat, sector_my, index)
+cht_my_region <- basic_chart(dat, my_region, index)
+cht_acc_type <- basic_chart(dat, acc_type, index)
+cht_sector_mature <- basic_chart(dat, sector_mature, index)
+cht_sector_should <- basic_chart(dat, sector_should, index)
+cht_gov_path <- basic_chart(dat, gov_path, index)
 
-cht_years <- dat %>% 
-      select(index, years) %>% 
-      count(years, sort =TRUE) %>% 
-      mutate(
-        percent = paste0(round(n/sum(n)*100,2),"%") 
-      )
+#List of what should be included in spreadsheet
+BasicCharts1 <- list(who_should = cht_who_should, 
+                     years = cht_years, 
+                     sector_my = cht_sector_my, 
+                     my_region = cht_my_region, 
+                     acc_type = cht_acc_type, 
+                     sector_mature = cht_sector_mature, 
+                     sector_should = cht_sector_should,
+                     gov_path = cht_gov_path)
+#Write to Gsheets 
+ss <- gs4_create("ACL_BasicCharts1", 
+                 sheets = BasicCharts1)
+
+
+cht_diff_bounties <- basic_chart(dat, diff_bounties, index)
+cht_diff_public_bodies <- basic_chart(dat, diff_public_bodies, index)
+cht_diff_open_audit_tool <- basic_chart(dat, diff_open_audit_tool, index)
+cht_diff_public_procurement <- basic_chart(dat, diff_public_procurement, index)
+cht_diff_impact_assess <- basic_chart(dat, diff_impact_assess, index)
+cht_diff_audit <- basic_chart(dat, diff_audit, index)
+cht_diff_direct_sh <- basic_chart(dat, diff_direct_sh, index)
+cht_diff_antic_interest_sh <- basic_chart(dat, diff_antic_interest_sh, index)
+cht_diff_disp_outcome <- basic_chart(dat, diff_disp_outcome, index)
+cht_diff_dataset_acc <- basic_chart(dat, diff_dataset_acc, index)
+cht_diff_expl <- basic_chart(dat, diff_expl, index)
+
+#List of what should be included in spreadsheet
+BasicCharts2 <- list(
+          bounties = cht_diff_bounties, 
+          public_bodies = cht_diff_public_bodies, 
+          open_audit_model = cht_diff_open_audit_tool, 
+          public_procurement = cht_diff_public_procurement, 
+          impact_assess = cht_diff_impact_assess, 
+          audit = cht_diff_audit, 
+          direct_sh = cht_diff_direct_sh, 
+          antic_interest = cht_diff_antic_interest_sh, 
+          disp_outcome = cht_diff_disp_outcome, 
+          dataset_acc = cht_diff_dataset_acc, 
+          expl = cht_diff_expl)
+#Write to Gsheets 
+ss <- gs4_create("ACL_BasicCharts2", 
+                 sheets = BasicCharts2)
+
+cht_matur_bounties <- basic_chart(dat, matur_bounties, index)
+cht_matur_public_bodies <- basic_chart(dat, matur_public_bodies, index)
+cht_matur_open_audit_tool <- basic_chart(dat, matur_open_audit_tool, index)
+cht_matur_public_procurement <- basic_chart(dat, matur_public_procurement, index)
+cht_matur_impact_assess <- basic_chart(dat, matur_impact_assess, index)
+cht_matur_direct_sh <- basic_chart(dat, matur_direct_sh, index)
+cht_matur_antic_interest_sh <- basic_chart(dat, matur_antic_interest_sh, index)
+cht_matur_disp_outcome <- basic_chart(dat, matur_disp_outcome, index)
+cht_matur_dataset_acc <- basic_chart(dat, matur_dataset_acc, index)
+cht_matur_expl <- basic_chart(dat, matur_expl, index)
+
+
+#List of what should be included in spreadsheet
+BasicCharts3 <- list(
+  bounties = cht_matur_bounties, 
+  public_bodies = cht_matur_public_bodies, 
+  open_audit_tool = cht_matur_open_audit_tool, 
+  public_procurement = cht_matur_public_procurement, 
+  impact_assess = cht_matur_impact_assess, 
+  direct_sh = cht_matur_direct_sh, 
+  antic_interest_sh = cht_matur_antic_interest_sh, 
+  disp_outcome = cht_matur_disp_outcome, 
+  dataset_acc = cht_matur_dataset_acc, 
+  expl = cht_matur_expl)
+#Write to Gsheets 
+ss <- gs4_create("ACL_BasicCharts3", 
+                 sheets = BasicCharts3)
 
 ```
 
 
 ```{r}
-
-#Can't get the function to work 
-#mult_select <- function(dat, mscol, index) {
-#    dat %>% 
-#    select(dat, !!sym(mscol), index) %>%
-#    separate_rows(!!sym(mscol), sep = ", ") %>% 
-#    count(!!sym(mscol), sort = TRUE ) %>% 
-#    mutate(
-#      percent = paste(round(n/sum(n)*100,2), "%")
-#    )}
-    
-#cht_role_should <- mult_select(dat, role_success, index)
+#How to do it without function- DONT USE  
+#cht_role_select <- dat %>% 
+#  select(index, role_success) %>% 
+#          separate_rows(role_success,  
+#                     sep = ", ") %>% 
+#          count(role_success, sort =TRUE) %>% 
+#      mutate(
+#        percent = paste0(round(n/sum(n)*100,2),"%") 
+#      )
 
 ```
 
