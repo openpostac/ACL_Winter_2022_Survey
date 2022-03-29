@@ -66,7 +66,7 @@ dat$index <- 1:nrow(dat)
 
 
 
-```{r}
+```{r, functions & generate charts}
 
 #Build a function for multi-select questions to get counts and percentages for multiple select questions (meaning there are multiple things that the respondent can select)
 
@@ -77,7 +77,10 @@ mult_select <- function(dat, mscol, index) {
     count({{ mscol }}, sort = TRUE ) %>% 
     mutate(
       percent = paste(round(n/sum(n)*100,2), "%")
-    )
+    ) %>%
+    rename(
+      opinion = 1
+    ) %>%
   return(newdf)
   }
 
@@ -96,9 +99,6 @@ MSCharts <- list(role_success = cht_role_success,
                  role_should = cht_role_should, 
                  obstacles = cht_obstacles, 
                  promising = cht_promising)
-#Write to Gsheets 
-ss <- gs4_create("ACL_MSCharts", 
-                 sheets = MSCharts)
 
 
 #Basic Chart Function w/o multiple select 
@@ -108,10 +108,14 @@ basic_chart <- function(dat, mscol, index) {
     count({{ mscol }}, sort = TRUE ) %>% 
     mutate(
       percent = paste(round(n/sum(n)*100,2), "%")
-    )
+    ) %>% 
+      rename(
+      opinion = 1
+    ) %>%
   return(newdf)
   }
-
+ 
+#Make charts for Basic Chart Chunk #1 (data is counts of variables)
 cht_who_should <- basic_chart(dat, who_should, index)
 cht_years <- basic_chart(dat, years, index)
 cht_sector_my <- basic_chart(dat, sector_my, index)
@@ -121,7 +125,7 @@ cht_sector_mature <- basic_chart(dat, sector_mature, index)
 cht_sector_should <- basic_chart(dat, sector_should, index)
 cht_gov_path <- basic_chart(dat, gov_path, index)
 
-#List of what should be included in spreadsheet
+#List of what should be included in spreadsheet for Basic Chart Chunk #1 
 BasicCharts1 <- list(who_should = cht_who_should, 
                      years = cht_years, 
                      sector_my = cht_sector_my, 
@@ -130,11 +134,8 @@ BasicCharts1 <- list(who_should = cht_who_should,
                      sector_mature = cht_sector_mature, 
                      sector_should = cht_sector_should,
                      gov_path = cht_gov_path)
-#Write to Gsheets 
-ss <- gs4_create("ACL_BasicCharts1", 
-                 sheets = BasicCharts1)
 
-
+#charts for Basic Chart Chunk #2 (data is likert scale easy/difficult)
 cht_diff_bounties <- basic_chart(dat, diff_bounties, index)
 cht_diff_public_bodies <- basic_chart(dat, diff_public_bodies, index)
 cht_diff_open_audit_tool <- basic_chart(dat, diff_open_audit_tool, index)
@@ -147,7 +148,7 @@ cht_diff_disp_outcome <- basic_chart(dat, diff_disp_outcome, index)
 cht_diff_dataset_acc <- basic_chart(dat, diff_dataset_acc, index)
 cht_diff_expl <- basic_chart(dat, diff_expl, index)
 
-#List of what should be included in spreadsheet
+#List of what should be included in Basic Chart Chunk #2 spreadsheet
 BasicCharts2 <- list(
           bounties = cht_diff_bounties, 
           public_bodies = cht_diff_public_bodies, 
@@ -160,10 +161,8 @@ BasicCharts2 <- list(
           disp_outcome = cht_diff_disp_outcome, 
           dataset_acc = cht_diff_dataset_acc, 
           expl = cht_diff_expl)
-#Write to Gsheets 
-ss <- gs4_create("ACL_BasicCharts2", 
-                 sheets = BasicCharts2)
 
+#charts for Basic Chart Chunk #3 (data is likert scale immature/mature)
 cht_matur_bounties <- basic_chart(dat, matur_bounties, index)
 cht_matur_public_bodies <- basic_chart(dat, matur_public_bodies, index)
 cht_matur_open_audit_tool <- basic_chart(dat, matur_open_audit_tool, index)
@@ -176,7 +175,7 @@ cht_matur_dataset_acc <- basic_chart(dat, matur_dataset_acc, index)
 cht_matur_expl <- basic_chart(dat, matur_expl, index)
 
 
-#List of what should be included in spreadsheet
+#List of what should be included in spreadsheet Basic Chart Chunk #3
 BasicCharts3 <- list(
   bounties = cht_matur_bounties, 
   public_bodies = cht_matur_public_bodies, 
@@ -188,14 +187,33 @@ BasicCharts3 <- list(
   disp_outcome = cht_matur_disp_outcome, 
   dataset_acc = cht_matur_dataset_acc, 
   expl = cht_matur_expl)
-#Write to Gsheets 
-ss <- gs4_create("ACL_BasicCharts3", 
-                 sheets = BasicCharts3)
+
+
 
 ```
 
 
-```{r}
+```{r, run googlesheets}
+#Write each of these four chunks to four Gsheets 
+
+#ss <- gs4_create("ACL_MSCharts", 
+#                 sheets = MSCharts)
+
+#ss <- gs4_create("ACL_BasicCharts1", 
+#                 sheets = BasicCharts1)
+
+#ss <- gs4_create("ACL_BasicCharts2", 
+#                 sheets = BasicCharts2)
+
+#ss <- gs4_create("ACL_BasicCharts3", 
+#                 sheets = BasicCharts3)
+
+
+``` 
+
+
+
+```{r, Extras}
 #How to do it without function- DONT USE  
 #cht_role_select <- dat %>% 
 #  select(index, role_success) %>% 

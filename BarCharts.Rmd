@@ -1,0 +1,64 @@
+---
+title: "BarCharts"
+output: html_document
+---
+Start by looking at what is already in DataScript to load in the data 
+```{r setup, include=FALSE}
+#Redo data so that it's pulled together by type and is tidy 
+
+
+
+
+# Maturity Questions
+
+#Create diverging data 
+cht_matur_bounties_diverge <- cht_matur_bounties %>%
+  mutate (percent_ans = if_else (percent %in% c("4 - Fairly Mature", "5 - Very Mature"), percent, -percent)) %>%
+  mutate(percent_ans_label = percent(percent_ans, accuracy = 1))
+
+
+j <- cht_matur_bounties %>%
+  ggplot(aes(x = matur_bounties, 
+             y = percent)) +
+  geom_col() +
+  geom_text(aes(label = percent),
+            position = position_stack(vjust = 0.5),
+            color = "white",
+            fontface = "bold") +
+  coord_flip() +
+  scale_x_discrete() +
+  scale_fill_viridis_d() +
+  labs(title = "Maturity of Bounties",
+       x = NULL,
+       fill = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "top")
+
+plot(j)
+
+# Difficulty
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

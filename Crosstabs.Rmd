@@ -1,0 +1,209 @@
+---
+title: "Crosstabs"
+output: html_document
+---
+## Crosstabs wanted
+1) sector_my
+private sector vs everyone else
+
+2)  Roles_my
+Stem vs everyone else (stem = (Computer or Data Scientist), or, (Engineer), or (Natural Scientist/Researcher)
+
+```{r setup, include=FALSE}
+# Run DataScript first
+#Recode mysector to private sector vs. everyone else 
+
+#new dataset dat2 with all the previous data plus a recoded 
+dat2 <- dat %>% 
+  mutate(
+    my_sector =  
+      recode(sector_my,
+        "Private sector" = "Private Sector",
+        "private and academia" = "Private Sector", 
+        "Academia" = "Other Sector",
+        "Civil Society" = "Other Sector",
+        "Government" = "Other Sector",
+        "NGO and Legal Practice"= "Other Sector",
+        "non-profit"= "Other Sector",
+        "Software Development"= "Other Sector",
+        "Technology"= "Other Sector")) %>%                   
+  mutate(
+    my_role =  
+      recode(role_my,
+        "Computer or Data Scientist" = "STEM",
+        "Engineer" = "STEM", 
+        "Natural Scientist/Researcher" = "STEM",
+        "Software Test Engineer" = "STEM",
+        "Consultant" = "Non STEM",
+        "Lawyer" = "Non STEM",
+        "Social Scientist or Humanities Researcher"= "Non STEM",
+        "Manager"= "Non STEM",
+        "Activist or Organizer"= "Non STEM",
+        "Corporate Executive"= "Non STEM", 
+        "UX/User Researcher"= "Non STEM", 
+        "Civil servant/public official"= "Non STEM",
+        "Clinical research"= "Non STEM", 
+        "consultant and educator"= "Non STEM", 
+        "Educator"= "Non STEM", 
+        "Executive Director"= "Non STEM",
+        "Social scientist/lawyer"= "Non STEM", 
+        "I guess, Digital Humanist = Computer/Data/Social Sciences scholar"= "Non STEM"
+        ))                    
+
+my_sector_recode <- dat2 %>% 
+  count(my_sector, sort = TRUE) %>%  
+    mutate(
+      percent = paste(round(n/sum(n)*100,2), "%")
+    )
+  
+roles_recode <- dat2 %>%   
+  count(my_role, sort = TRUE) %>%  
+    mutate(
+      percent = paste(round(n/sum(n)*100,2), "%")
+    )
+ 
+```
+
+
+```{r Crosstabs}
+
+#Generating Cross Tabs! 
+#First figure out the way the tabyl should look 
+dat2 %>% 
+  tabyl(my_sector, my_role) %>% 
+  adorn_percentages("row") %>% 
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns() %>% 
+  adorn_title("combined")
+
+#Then make a function to use for multiple select variables
+
+MultSelect_Xtab <- function(dat, ms, y) {
+    newdf <- dat %>%
+    select({{ ms }}, {{y}}) %>%
+    separate_rows({{ ms }}, sep = ", ") %>% 
+    tabyl({{ms}}, {{y}}) %>% 
+      adorn_percentages("row") %>% 
+      adorn_pct_formatting(digits = 1) %>% 
+      adorn_ns() %>% 
+      adorn_title("combined") %>% 
+  return(newdf)
+  }      
+      
+#Run the function for Xtabs for each of the multiple select variables 
+x_role_success <- MultSelect_Xtab(dat2, role_success, my_sector)
+x_role_should <- MultSelect_Xtab(dat2, role_should, my_sector)
+x_obstacles <- MultSelect_Xtab(dat2, obstacles, my_sector)
+x_promising <- MultSelect_Xtab(dat2, promising_area, my_sector)  
+
+x_MSCharts <- list(role_success = x_role_success, 
+                 role_should = x_role_should, 
+                 obstacles = x_obstacles, 
+                 promising = x_promising)
+
+#now make a function for basic cross tabs 
+Basic_Xtab <- function(dat, ms, y) {
+    newdf <- dat %>%
+    tabyl({{ms}}, {{y}}) %>% 
+      adorn_percentages("row") %>% 
+      adorn_pct_formatting(digits = 1) %>% 
+      adorn_ns() %>% 
+      adorn_title("combined") %>% 
+  return(newdf)
+  }      
+
+#Run this function to make Xtabs for Basic Chart Chunk #1 
+x_who_should <- Basic_Xtab(dat2, who_should, my_sector)
+x_years <- Basic_Xtab(dat2, years, my_sector)
+x_sector_my <- Basic_Xtab(dat2, sector_my, my_sector)
+x_my_region <- Basic_Xtab(dat2, my_region, my_sector)
+x_acc_type <- Basic_Xtab(dat2, acc_type, my_sector)
+x_sector_mature <- Basic_Xtab(dat2, sector_mature, my_sector)
+x_sector_should <- Basic_Xtab(dat2, sector_should, my_sector)
+x_gov_path <- Basic_Xtab(dat2, gov_path, my_sector)
+
+x_BasicCharts1 <- list(who_should = x_who_should, 
+                     years = x_years, 
+                     sector_my = x_sector_my, 
+                     my_region = x_my_region, 
+                     acc_type = x_acc_type, 
+                     sector_mature = x_sector_mature, 
+                     sector_should = x_sector_should,
+                     gov_path = x_gov_path)
+
+#Run function to make xtabs for Basic Chart Chunk #2 (data is likert scale easy/difficult)
+x_diff_bounties <- Basic_Xtab(dat2, diff_bounties, my_sector)
+x_diff_public_bodies <- Basic_Xtab(dat2, diff_public_bodies, my_sector)
+x_diff_open_audit_tool <- Basic_Xtab(dat2, diff_open_audit_tool, my_sector)
+x_diff_public_procurement <- Basic_Xtab(dat2, diff_public_procurement, my_sector)
+x_diff_impact_assess <- Basic_Xtab(dat2, diff_impact_assess, my_sector)
+x_diff_audit <- Basic_Xtab(dat2, diff_audit, my_sector)
+x_diff_direct_sh <- Basic_Xtab(dat2, diff_direct_sh, my_sector)
+x_diff_antic_interest_sh <- Basic_Xtab(dat2, diff_antic_interest_sh, my_sector)
+x_diff_dataset_acc <- Basic_Xtab(dat2, diff_dataset_acc, my_sector)
+x_diff_disp_outcome <- Basic_Xtab(dat2, diff_disp_outcome, my_sector)
+x_diff_expl <- Basic_Xtab(dat2, diff_expl, my_sector)
+
+#List of what should be included in Basic Chart Chunk #2 xtabs spreadsheet
+x_BasicCharts2 <- list(
+          bounties = x_diff_bounties, 
+          public_bodies = x_diff_public_bodies, 
+          open_audit_model = x_diff_open_audit_tool, 
+          public_procurement = x_diff_public_procurement, 
+          impact_assess = x_diff_impact_assess, 
+          audit = x_diff_audit, 
+          direct_sh = x_diff_direct_sh, 
+          antic_interest = x_diff_antic_interest_sh, 
+          disp_outcome = x_diff_disp_outcome, 
+          dataset_acc = x_diff_dataset_acc, 
+          expl = x_diff_expl)
+
+#xtabs for Basic Chart Chunk #3 (data is likert scale immature/mature)
+x_matur_bounties <- Basic_Xtab(dat2, matur_bounties, my_sector)
+x_matur_public_bodies <- Basic_Xtab(dat2, matur_public_bodies, my_sector)
+x_matur_open_audit_tool <- Basic_Xtab(dat2, matur_open_audit_tool, my_sector)
+x_matur_public_procurement <- Basic_Xtab(dat2, matur_public_procurement, my_sector)
+x_matur_impact_assess <- Basic_Xtab(dat2, matur_impact_assess, my_sector)
+x_matur_direct_sh <- Basic_Xtab(dat2, matur_direct_sh, my_sector)
+x_matur_antic_interest_sh <- Basic_Xtab(dat2, matur_antic_interest_sh, my_sector)
+x_matur_disp_outcome <- Basic_Xtab(dat2, matur_disp_outcome, my_sector)
+x_matur_dataset_acc <- Basic_Xtab(dat2, matur_dataset_acc, my_sector)
+x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_sector)
+
+
+#List of what should be included in xtabs spreadsheet Basic Chart Chunk #3
+x_BasicCharts3 <- list(
+  bounties = x_matur_bounties, 
+  public_bodies = x_matur_public_bodies, 
+  open_audit_tool = x_matur_open_audit_tool, 
+  public_procurement = x_matur_public_procurement, 
+  impact_assess = x_matur_impact_assess, 
+  direct_sh = x_matur_direct_sh, 
+  antic_interest_sh = x_matur_antic_interest_sh, 
+  disp_outcome = x_matur_disp_outcome, 
+  dataset_acc = x_matur_dataset_acc, 
+  expl = x_matur_expl)
+
+
+#This is the command to put crosstabs into GoogleSheets Do ONE TIME
+#Start with the Sector Sheets 
+
+#ss <- gs4_create("ACL_MultipleSelectXtabs_Sector", 
+#                 sheets = x_MSCharts)
+#ss <- gs4_create("ACL_BasicXtabs1_Sector", 
+#                 sheets = x_BasicCharts1)
+#ss <- gs4_create("ACL_BasicXtabs2_Sector", 
+#                 sheets = x_BasicCharts2)
+#ss <- gs4_create("ACL_BasicXtabs3_Sector", 
+#                 sheets = x_BasicCharts3)
+
+
+
+```
+
+
+
+
+```{r, Run to make GSpreadsheets}
+
+
