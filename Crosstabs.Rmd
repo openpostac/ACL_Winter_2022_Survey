@@ -13,7 +13,7 @@ Stem vs everyone else (stem = (Computer or Data Scientist), or, (Engineer), or (
 # Run DataScript first
 #Recode mysector to private sector vs. everyone else 
 
-#new dataset dat2 with all the previous data plus a recoded 
+#new dataset dat2 with all the previous data plus a recoded variable for each the sector and role info. 
 dat2 <- dat %>% 
   mutate(
     my_sector =  
@@ -65,13 +65,13 @@ roles_recode <- dat2 %>%
 ```
 
 
-```{r Crosstabs}
+```{r Crosstabs functions }
 
 #Generating Cross Tabs! 
 #First figure out the way the tabyl should look 
 dat2 %>% 
   tabyl(my_sector, my_role) %>% 
-  adorn_percentages("row") %>% 
+  adorn_percentages("col") %>% 
   adorn_pct_formatting(digits = 1) %>% 
   adorn_ns() %>% 
   adorn_title("combined")
@@ -83,14 +83,28 @@ MultSelect_Xtab <- function(dat, ms, y) {
     select({{ ms }}, {{y}}) %>%
     separate_rows({{ ms }}, sep = ", ") %>% 
     tabyl({{ms}}, {{y}}) %>% 
-      adorn_percentages("row") %>% 
+      adorn_percentages("col") %>% 
       adorn_pct_formatting(digits = 1) %>% 
       adorn_ns() %>% 
       adorn_title("combined") %>% 
   return(newdf)
   }      
       
-#Run the function for Xtabs for each of the multiple select variables 
+#now make a function for basic cross tabs 
+Basic_Xtab <- function(dat, ms, y) {
+    newdf <- dat %>%
+    tabyl({{ms}}, {{y}}) %>% 
+      adorn_percentages("col") %>% 
+      adorn_pct_formatting(digits = 1) %>% 
+      adorn_ns() %>% 
+      adorn_title("combined") %>% 
+  return(newdf)
+  }      
+```
+
+
+```{r Xtabs for Sector }
+#Run the function for Xtabs for each of the multiple select variables - Sector  
 x_role_success <- MultSelect_Xtab(dat2, role_success, my_sector)
 x_role_should <- MultSelect_Xtab(dat2, role_should, my_sector)
 x_obstacles <- MultSelect_Xtab(dat2, obstacles, my_sector)
@@ -101,18 +115,7 @@ x_MSCharts <- list(role_success = x_role_success,
                  obstacles = x_obstacles, 
                  promising = x_promising)
 
-#now make a function for basic cross tabs 
-Basic_Xtab <- function(dat, ms, y) {
-    newdf <- dat %>%
-    tabyl({{ms}}, {{y}}) %>% 
-      adorn_percentages("row") %>% 
-      adorn_pct_formatting(digits = 1) %>% 
-      adorn_ns() %>% 
-      adorn_title("combined") %>% 
-  return(newdf)
-  }      
-
-#Run this function to make Xtabs for Basic Chart Chunk #1 
+#Run this function to make Xtabs for Basic Chart Chunk #1 - Sector 
 x_who_should <- Basic_Xtab(dat2, who_should, my_sector)
 x_years <- Basic_Xtab(dat2, years, my_sector)
 x_sector_my <- Basic_Xtab(dat2, sector_my, my_sector)
@@ -131,7 +134,7 @@ x_BasicCharts1 <- list(who_should = x_who_should,
                      sector_should = x_sector_should,
                      gov_path = x_gov_path)
 
-#Run function to make xtabs for Basic Chart Chunk #2 (data is likert scale easy/difficult)
+#Run function to make xtabs for Basic Chart Chunk #2 (data is likert scale easy/difficult) - Sector 
 x_diff_bounties <- Basic_Xtab(dat2, diff_bounties, my_sector)
 x_diff_public_bodies <- Basic_Xtab(dat2, diff_public_bodies, my_sector)
 x_diff_open_audit_tool <- Basic_Xtab(dat2, diff_open_audit_tool, my_sector)
@@ -158,7 +161,7 @@ x_BasicCharts2 <- list(
           dataset_acc = x_diff_dataset_acc, 
           expl = x_diff_expl)
 
-#xtabs for Basic Chart Chunk #3 (data is likert scale immature/mature)
+#xtabs for Basic Chart Chunk #3 (data is likert scale immature/mature) - Sector 
 x_matur_bounties <- Basic_Xtab(dat2, matur_bounties, my_sector)
 x_matur_public_bodies <- Basic_Xtab(dat2, matur_public_bodies, my_sector)
 x_matur_open_audit_tool <- Basic_Xtab(dat2, matur_open_audit_tool, my_sector)
@@ -184,26 +187,88 @@ x_BasicCharts3 <- list(
   dataset_acc = x_matur_dataset_acc, 
   expl = x_matur_expl)
 
+```
+
+```{r Run for Gdocs - Sector}
 
 #This is the command to put crosstabs into GoogleSheets Do ONE TIME
 #Start with the Sector Sheets 
 
-#ss <- gs4_create("ACL_MultipleSelectXtabs_Sector", 
-#                 sheets = x_MSCharts)
-#ss <- gs4_create("ACL_BasicXtabs1_Sector", 
-#                 sheets = x_BasicCharts1)
-#ss <- gs4_create("ACL_BasicXtabs2_Sector", 
-#                 sheets = x_BasicCharts2)
-#ss <- gs4_create("ACL_BasicXtabs3_Sector", 
-#                 sheets = x_BasicCharts3)
-
-
+ss <- gs4_create("ACL_MultipleSelectXtabs_Sector", 
+                 sheets = x_MSCharts)
+ss <- gs4_create("ACL_BasicXtabs1_Sector", 
+                 sheets = x_BasicCharts1)
+ss <- gs4_create("ACL_BasicXtabs2_Sector", 
+                 sheets = x_BasicCharts2)
+ss <- gs4_create("ACL_BasicXtabs3_Sector", 
+                 sheets = x_BasicCharts3)
 
 ```
 
 
+```{r Xtabs for Role }
 
 
-```{r, Run to make GSpreadsheets}
+
+#Run same analyses for Role 
+
+#Run the function for Xtabs for each of the multiple select variables - Role  
+x_role_success <- MultSelect_Xtab(dat2, role_success, my_role)
+x_role_should <- MultSelect_Xtab(dat2, role_should, my_role)
+x_obstacles <- MultSelect_Xtab(dat2, obstacles, my_role)
+x_promising <- MultSelect_Xtab(dat2, promising_area, my_role)  
+
+#Run this function to make Xtabs for Basic Chart Chunk #1 - Role  
+x_who_should <- Basic_Xtab(dat2, who_should, my_role)
+x_years <- Basic_Xtab(dat2, years, my_role)
+x_sector_my <- Basic_Xtab(dat2, sector_my, my_role)
+x_my_region <- Basic_Xtab(dat2, my_region, my_role)
+x_acc_type <- Basic_Xtab(dat2, acc_type, my_role)
+x_sector_mature <- Basic_Xtab(dat2, sector_mature, my_role)
+x_sector_should <- Basic_Xtab(dat2, sector_should, my_role)
+x_gov_path <- Basic_Xtab(dat2, gov_path, my_role)
+
+#Run function to make xtabs for Basic Chart Chunk #2 (data is likert scale easy/difficult) - Role 
+x_diff_bounties <- Basic_Xtab(dat2, diff_bounties, my_role)
+x_diff_public_bodies <- Basic_Xtab(dat2, diff_public_bodies, my_role)
+x_diff_open_audit_tool <- Basic_Xtab(dat2, diff_open_audit_tool, my_role)
+x_diff_public_procurement <- Basic_Xtab(dat2, diff_public_procurement, my_role)
+x_diff_impact_assess <- Basic_Xtab(dat2, diff_impact_assess, my_role)
+x_diff_audit <- Basic_Xtab(dat2, diff_audit, my_role)
+x_diff_direct_sh <- Basic_Xtab(dat2, diff_direct_sh, my_role)
+x_diff_antic_interest_sh <- Basic_Xtab(dat2, diff_antic_interest_sh, my_role)
+x_diff_dataset_acc <- Basic_Xtab(dat2, diff_dataset_acc, my_role)
+x_diff_disp_outcome <- Basic_Xtab(dat2, diff_disp_outcome, my_role)
+x_diff_expl <- Basic_Xtab(dat2, diff_expl, my_role)
+
+#xtabs for Basic Chart Chunk #3 (data is likert scale immature/mature) - Role 
+x_matur_bounties <- Basic_Xtab(dat2, matur_bounties, my_role)
+x_matur_public_bodies <- Basic_Xtab(dat2, matur_public_bodies, my_role)
+x_matur_open_audit_tool <- Basic_Xtab(dat2, matur_open_audit_tool, my_role)
+x_matur_public_procurement <- Basic_Xtab(dat2, matur_public_procurement, my_role)
+x_matur_impact_assess <- Basic_Xtab(dat2, matur_impact_assess, my_role)
+x_matur_direct_sh <- Basic_Xtab(dat2, matur_direct_sh, my_role)
+x_matur_antic_interest_sh <- Basic_Xtab(dat2, matur_antic_interest_sh, my_role)
+x_matur_disp_outcome <- Basic_Xtab(dat2, matur_disp_outcome, my_role)
+x_matur_dataset_acc <- Basic_Xtab(dat2, matur_dataset_acc, my_role)
+x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_role)
 
 
+```
+
+```{r Run for Gdocs - Role }
+
+#This is the command to put crosstabs into GoogleSheets Do ONE TIME
+#Start with the Sector Sheets 
+
+ss <- gs4_create("ACL_MultipleSelectXtabs_Role", 
+                 sheets = x_MSCharts)
+ss <- gs4_create("ACL_BasicXtabs1_Role", 
+                 sheets = x_BasicCharts1)
+ss <- gs4_create("ACL_BasicXtabs2_Role", 
+                 sheets = x_BasicCharts2)
+ss <- gs4_create("ACL_BasicXtabs3_Role", 
+                 sheets = x_BasicCharts3)
+
+
+```
