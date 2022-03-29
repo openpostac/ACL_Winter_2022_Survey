@@ -11,9 +11,12 @@ Stem vs everyone else (stem = (Computer or Data Scientist), or, (Engineer), or (
 
 ```{r setup, include=FALSE}
 # Run DataScript first
-#Recode mysector to private sector vs. everyone else 
 
-#new dataset dat2 with all the previous data plus a recoded variable for each the sector and role info. 
+# Note that things are organized into chunks and you should run the chunks of code for either sector or role. If you run them together, they're going to use the same variables and reproduce the same things twice. Not ideal. 
+
+
+# Start by creating a new dataset dat2 with all the previous data plus a recoded variable for each the sector and role info. We've collapsed the multiple categories into two for each Priavte sector vs. other sector and stem vs. not stem 
+
 dat2 <- dat %>% 
   mutate(
     my_sector =  
@@ -50,6 +53,8 @@ dat2 <- dat %>%
         "I guess, Digital Humanist = Computer/Data/Social Sciences scholar"= "Non STEM"
         ))                    
 
+#this gives a quick count of the sector and roles recodes. 
+
 my_sector_recode <- dat2 %>% 
   count(my_sector, sort = TRUE) %>%  
     mutate(
@@ -67,7 +72,7 @@ roles_recode <- dat2 %>%
 
 ```{r Crosstabs functions }
 
-#Generating Cross Tabs! 
+#To generate cross tabs  we create a tabyl that we want and then make functions for the different types of variables 
 #First figure out the way the tabyl should look 
 dat2 %>% 
   tabyl(my_sector, my_role) %>% 
@@ -76,7 +81,8 @@ dat2 %>%
   adorn_ns() %>% 
   adorn_title("combined")
 
-#Then make a function to use for multiple select variables
+#Then make a function to use for multiple select variables 
+#multiple select needs separate_rows function because they're otherwise hard to count. 
 
 MultSelect_Xtab <- function(dat, ms, y) {
     newdf <- dat %>%
@@ -90,7 +96,7 @@ MultSelect_Xtab <- function(dat, ms, y) {
   return(newdf)
   }      
       
-#now make a function for basic cross tabs 
+#now make a function for basic cross tabs without separate_rows
 Basic_Xtab <- function(dat, ms, y) {
     newdf <- dat %>%
     tabyl({{ms}}, {{y}}) %>% 
@@ -102,6 +108,8 @@ Basic_Xtab <- function(dat, ms, y) {
   }      
 ```
 ```{r Setup Groupings}
+
+#I've broken up the variables into four groups based on data type, one is a multiple select the other three are "basic" charts usually with likerts. This is to make it a little bit easier to see in the spreadsheets. and because there are a lot of variables. 
 
 x_MSCharts <- list(role_success = x_role_success, 
                  role_should = x_role_should, 
@@ -147,7 +155,9 @@ x_BasicCharts3 <- list(
 ```
 
 ```{r Xtabs for Sector }
-#Run the function for Xtabs for each of the multiple select variables - Sector  
+#this is tedious and I know someone else could figure out how to run a function over a bunch of variables, but I didn't have time to do it, so I wrote it out here. 
+
+#Now I run the function for Xtabs for each of the multiple select variables  - Sector  
 x_role_success <- MultSelect_Xtab(dat2, role_success, my_sector)
 x_role_should <- MultSelect_Xtab(dat2, role_should, my_sector)
 x_obstacles <- MultSelect_Xtab(dat2, obstacles, my_sector)
@@ -197,14 +207,14 @@ x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_sector)
 #This is the command to put crosstabs into GoogleSheets Do ONE TIME
 #Start with the Sector Sheets 
 
-ss <- gs4_create("ACL_MultipleSelectXtabs_Sector", 
-                 sheets = x_MSCharts)
-ss <- gs4_create("ACL_BasicXtabs1_Sector", 
-                 sheets = x_BasicCharts1)
-ss <- gs4_create("ACL_BasicXtabs2_Sector", 
-                 sheets = x_BasicCharts2)
-ss <- gs4_create("ACL_BasicXtabs3_Sector", 
-                 sheets = x_BasicCharts3)
+#ss <- gs4_create("ACL_MultipleSelectXtabs_Sector", 
+#                 sheets = x_MSCharts)
+#ss <- gs4_create("ACL_BasicXtabs1_Sector", 
+#                 sheets = x_BasicCharts1)
+#ss <- gs4_create("ACL_BasicXtabs2_Sector", 
+#                 sheets = x_BasicCharts2)
+#ss <- gs4_create("ACL_BasicXtabs3_Sector", 
+#                 sheets = x_BasicCharts3)
 
 ```
 
