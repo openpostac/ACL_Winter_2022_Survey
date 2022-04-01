@@ -4,31 +4,88 @@ output: html_document
 ---
 Start by looking at what is already in DataScript to load in the data 
 ```{r setup, include=FALSE}
-#Redo data so that it's pulled together by type and is tidy 
-
-
-
+library(tidyverse)
+library(scales)
 
 # Maturity Questions
 
-#Create diverging data 
-cht_matur_bounties_diverge <- cht_matur_bounties %>%
-  mutate (percent_ans = if_else (percent %in% c("4 - Fairly Mature", "5 - Very Mature"), percent, -percent)) %>%
-  mutate(percent_ans_label = percent(percent_ans, accuracy = 1))
+#dat_easydiff <- dat2 %>% 
+#  select(starts_with("diff_")) 
+
+bounties <- dat_easydiff %>% 
+  select(diff_bounties) %>% 
+  count(diff_bounties) %>% 
+  mutate(
+    question = rep("bounties")
+  )
+
+count_data <- function(dat, col, qname){ 
+  newdf <- dat %>% 
+    select ("opinion" = {{col}}) %>% 
+    count(opinion) %>% 
+    mutate(
+      question = rep(qname)
+    ) %>% 
+    return(newdf)
+      } 
+
+#changed name of the column to opinion
+
+lik_bounties <- count_data(dat2, diff_bounties, "bounties")
+lik_public_bodies <- count_data(dat2, diff_public_bodies,"public_bodies")
+lik_open_audit <- count_data(dat2, diff_open_audit_tool, "open_audit") 
+lik_diff_public_procure <- count_data(dat2, diff_public_procurement, "pub_procure")
+lik_impact_assess <- count_data(dat2, diff_impact_assess, "impact_assess")
+lik_audit <- count_data(dat2, diff_audit, "audit")
+lik_direct_sh <- count_data(dat2,diff_direct_sh, "direct_sh")
+lik_antic_interest <- count_data(dat2, diff_antic_interest_sh, "antic_interest")
+lik_disp_outcome <- count_data(dat2, diff_disp_outcome, "disp_outcome")
+lik_dataset_acc <- count_data(dat2, diff_dataset_acc, "dataset_acc")
+lik_expl <- count_data(dat2, diff_expl, "expl")
+
+lik_list <- list(
+  lik_bounties, 
+  lik_public_bodies, 
+  lik_open_audit, 
+  lik_diff_public_procure, 
+  lik_impact_assess, 
+  lik_audit, 
+  lik_direct_sh, 
+  lik_antic_interest, 
+  lik_disp_outcome, 
+  lik_dataset_acc, 
+  lik_expl)
+
+#make data set that has all of these data in the manner I want YAY! 
+dat_easydiff2 <-  
+  bind_rows(list(lik_open_audit, lik_public_bodies, lik_bounties, lik_diff_public_procure, lik_impact_assess, lik_audit, lik_direct_sh, lik_antic_interest, lik_disp_outcome, lik_dataset_acc, lik_expl))
+
+#summarize data 
+
+easy_diff_summary <- dat_easydiff2 %>% 
+  group_by(question) %>% 
+  mutate(percent_answers = n/sum(n)) %>% 
+  ungroup() %>% 
+  mutate(percent_label = percent(percent_answers, accuracy = 1))
+```  
 
 
-j <- cht_matur_bounties %>%
-  ggplot(aes(x = matur_bounties, 
-             y = percent)) +
+```{r Chart Plotting}
+
+#Basic Chart 
+t <- easy_diff_summary %>%
+  ggplot(aes(x = question, 
+             y = percent_answers,
+             fill = opinion)) +
   geom_col() +
-  geom_text(aes(label = percent),
+  geom_text(aes(label = percent_label),
             position = position_stack(vjust = 0.5),
             color = "white",
             fontface = "bold") +
   coord_flip() +
   scale_x_discrete() +
   scale_fill_viridis_d() +
-  labs(title = "Maturity of Bounties",
+  labs(title = "How Easy or Difficult?",
        x = NULL,
        fill = NULL) +
   theme_minimal() +
@@ -37,28 +94,47 @@ j <- cht_matur_bounties %>%
         panel.grid = element_blank(),
         legend.position = "top")
 
-plot(j)
 
-# Difficulty
+#diverging bar chart 
+easy_diff_diverge <- easy_diff_summary %>%
+  mutate(percent_answers = if_else(opinion %in% c("1 - Very easy", "2 - Somewhat easy", "3 - Neither easy nor difficult"), percent_answers, -percent_answers)) %>% 
+  mutate(percent_answers_label = percent(percent_answers, accuracy = 1))
 
+easy_diff_diverge
+
+easy_diff_diverge %>%
+  ggplot(aes(x = question, 
+             y = percent_answers,
+             fill = opinion)) +
+  geom_col() +
+  geom_text(aes(label = percent_label),
+            position = position_stack(vjust = 0.5),
+            color = "white",
+            fontface = "bold") +
+  coord_flip() +
+  scale_x_discrete() +
+  scale_fill_viridis_d() +
+  labs(title = "How Easy or Difficult?",
+       x = NULL,
+       fill = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "top")
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
-```
 
-## Including Plots
 
-You can also embed plots, for example:
+#order the opinions 
+opinion_order <- opinion %>% 
+  mutate (opinion = fct_relevel(opinion, 
+          "1 - Very Immature", "2 - Somewhat immature", "3 - Moderately mature", "4 - Fairly mature", "5 - Very Mature", "I don't know", "NA"),
+          opinion = fct_rev(opinion))
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+

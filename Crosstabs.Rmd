@@ -107,52 +107,7 @@ Basic_Xtab <- function(dat, ms, y) {
   return(newdf)
   }      
 ```
-```{r Setup Groupings}
 
-#I've broken up the variables into four groups based on data type, one is a multiple select the other three are "basic" charts usually with likerts. This is to make it a little bit easier to see in the spreadsheets. and because there are a lot of variables. 
-
-x_MSCharts <- list(role_success = x_role_success, 
-                 role_should = x_role_should, 
-                 obstacles = x_obstacles, 
-                 promising = x_promising)
-
-x_BasicCharts1 <- list(who_should = x_who_should, 
-                     years = x_years, 
-                     sector_my = x_sector_my, 
-                     my_region = x_my_region, 
-                     acc_type = x_acc_type, 
-                     sector_mature = x_sector_mature, 
-                     sector_should = x_sector_should,
-                     gov_path = x_gov_path)
-
-#List of what should be included in Basic Chart Chunk #2 xtabs spreadsheet
-x_BasicCharts2 <- list(
-          bounties = x_diff_bounties, 
-          public_bodies = x_diff_public_bodies, 
-          open_audit_model = x_diff_open_audit_tool, 
-          public_procurement = x_diff_public_procurement, 
-          impact_assess = x_diff_impact_assess, 
-          audit = x_diff_audit, 
-          direct_sh = x_diff_direct_sh, 
-          antic_interest = x_diff_antic_interest_sh, 
-          disp_outcome = x_diff_disp_outcome, 
-          dataset_acc = x_diff_dataset_acc, 
-          expl = x_diff_expl)
-
-#List of what should be included in xtabs spreadsheet Basic Chart Chunk #3
-x_BasicCharts3 <- list(
-  bounties = x_matur_bounties, 
-  public_bodies = x_matur_public_bodies, 
-  open_audit_tool = x_matur_open_audit_tool, 
-  public_procurement = x_matur_public_procurement, 
-  impact_assess = x_matur_impact_assess, 
-  direct_sh = x_matur_direct_sh, 
-  antic_interest_sh = x_matur_antic_interest_sh, 
-  disp_outcome = x_matur_disp_outcome, 
-  dataset_acc = x_matur_dataset_acc, 
-  expl = x_matur_expl)
-
-```
 
 ```{r Xtabs for Sector }
 #this is tedious and I know someone else could figure out how to run a function over a bunch of variables, but I didn't have time to do it, so I wrote it out here. 
@@ -198,7 +153,59 @@ x_matur_antic_interest_sh <- Basic_Xtab(dat2, matur_antic_interest_sh, my_sector
 x_matur_disp_outcome <- Basic_Xtab(dat2, matur_disp_outcome, my_sector)
 x_matur_dataset_acc <- Basic_Xtab(dat2, matur_dataset_acc, my_sector)
 x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_sector)
+x_matur_audit <- Basic_Xtab(dat2, matur_audit, my_sector)
 
+#Xtabs for the main variables 
+
+
+
+```
+
+```{r Setup Groupings}
+
+#I've broken up the variables into four groups based on data type, one is a multiple select the other three are "basic" charts usually with likerts. This is to make it a little bit easier to see in the spreadsheets. and because there are a lot of variables. 
+
+x_MSCharts <- list(role_success = x_role_success, 
+                 role_should = x_role_should, 
+                 obstacles = x_obstacles, 
+                 promising = x_promising)
+
+x_BasicCharts1 <- list(who_should = x_who_should, 
+                     years = x_years, 
+                     sector_my = x_sector_my, 
+                     my_region = x_my_region, 
+                     acc_type = x_acc_type, 
+                     sector_mature = x_sector_mature, 
+                     sector_should = x_sector_should,
+                     gov_path = x_gov_path)
+
+#List of what should be included in Basic Chart Chunk #2 xtabs spreadsheet
+x_BasicCharts2 <- list(
+          bounties = x_diff_bounties, 
+          public_bodies = x_diff_public_bodies, 
+          open_audit_model = x_diff_open_audit_tool, 
+          public_procurement = x_diff_public_procurement, 
+          impact_assess = x_diff_impact_assess, 
+          audit = x_diff_audit, 
+          direct_sh = x_diff_direct_sh, 
+          antic_interest = x_diff_antic_interest_sh, 
+          disp_outcome = x_diff_disp_outcome, 
+          dataset_acc = x_diff_dataset_acc, 
+          expl = x_diff_expl)
+
+#List of what should be included in xtabs spreadsheet Basic Chart Chunk #3
+x_BasicCharts3 <- list(
+  bounties = x_matur_bounties, 
+  public_bodies = x_matur_public_bodies, 
+  open_audit_tool = x_matur_open_audit_tool, 
+  public_procurement = x_matur_public_procurement, 
+  impact_assess = x_matur_impact_assess, 
+  direct_sh = x_matur_direct_sh, 
+  antic_interest_sh = x_matur_antic_interest_sh, 
+  disp_outcome = x_matur_disp_outcome, 
+  dataset_acc = x_matur_dataset_acc, 
+  expl = x_matur_expl, 
+  audit = x_matur_audit)
 
 ```
 
@@ -214,7 +221,7 @@ x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_sector)
 #ss <- gs4_create("ACL_BasicXtabs2_Sector", 
 #                 sheets = x_BasicCharts2)
 #ss <- gs4_create("ACL_BasicXtabs3_Sector", 
-#                 sheets = x_BasicCharts3)
+#                sheets = x_BasicCharts3)
 
 ```
 
@@ -263,7 +270,19 @@ x_matur_antic_interest_sh <- Basic_Xtab(dat2, matur_antic_interest_sh, my_role)
 x_matur_disp_outcome <- Basic_Xtab(dat2, matur_disp_outcome, my_role)
 x_matur_dataset_acc <- Basic_Xtab(dat2, matur_dataset_acc, my_role)
 x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_role)
+x_matur_audit <- basic_chart(dat, matur_audit, index)
+```
 
+
+```{r Extra xtabs }
+#Basic xtab crossed with each other
+x_sector_stem  <- dat2 %>%
+    tabyl(role_my, sector_my) %>% 
+      adorn_totals("both") %>% 
+      adorn_title("combined") 
+
+
+x_sector_stem
 
 ```
 
@@ -281,5 +300,5 @@ x_matur_expl <- Basic_Xtab(dat2, matur_expl, my_role)
 #ss <- gs4_create("ACL_BasicXtabs3_Role", 
 #                 sheets = x_BasicCharts3)
 
-
+#ss<= gs4_create("ACL_role_sector", sheets = x_sector_stem) 
 ```
